@@ -6,55 +6,9 @@ import (
 	"log"
 	"os"
 	"strconv"
-	"strings"
 )
 
-type calories int
-
-// func toCalorie(x int) calories {
-// 	return calories(x)
-
-// }
-
-type elf struct {
-	id            int
-	totalCalories calories
-	snacks        []calories
-	totalSnacks   int
-}
-
-func (e *elf) setTotalCalories() {
-	var totalCalories calories
-	for _, v := range e.snacks {
-		totalCalories += v
-	}
-	e.totalCalories = totalCalories
-}
-
-func (e *elf) setTotalSnacks() int {
-	e.totalSnacks = len(e.snacks)
-	return e.totalSnacks
-}
-
-func (e *elf) getTotalCalories() calories {
-	var totalCalories calories
-	for _, v := range e.snacks {
-		totalCalories += v
-	}
-	e.totalCalories = totalCalories
-	return e.totalCalories
-}
-
-func (e *elf) getTotalSnacks() int {
-	e.totalSnacks = len(e.snacks)
-	return e.totalSnacks
-}
-
 func main() {
-	var (
-		count int = 1
-	)
-
 	f, err := os.Open("./inputs/data.txt")
 	defer f.Close()
 
@@ -62,34 +16,43 @@ func main() {
 		panic(err)
 	}
 
-	elves := []elf{}
-
 	scanner := bufio.NewScanner(f)
 	scanner.Split(bufio.ScanLines)
+	var lines []string
 	for scanner.Scan() {
-		s := strings.Join(strings.Split(scanner.Text(), "\n"), "")
-		elf := elf{id: count}
-
-		if s != "" {
-			x, err := strconv.Atoi(s)
-			if err != nil {
-				log.Println(err)
-			}
-			fmt.Println(elf.snacks)
-			elf.snacks = append(elf.snacks, calories(x))
-			fmt.Println(elf)
-		} else {
-			count += 1
-			fmt.Println(elf)
-		}
-
-		elf.setTotalCalories()
-		elf.setTotalSnacks()
-		elves = append(elves, elf)
+		lines = append(lines, scanner.Text())
 	}
 
-	fmt.Printf("Total Elves: %v\n", len(elves))
-	fmt.Println(elves[0])
-	fmt.Println(elves[len(elves)-1])
+	var elfSnacks []int
+	snacks := 0
 
+	for _, v := range lines {
+		if len(v) == 0 {
+			elfSnacks = append(elfSnacks, snacks)
+			snacks = 0
+			continue
+		}
+		calories, err := strconv.Atoi(v)
+		if err != nil {
+			log.Fatal(err)
+		}
+		snacks += calories
+	}
+	elfSnacks = append(elfSnacks, snacks)
+
+	elf, calorieCount := findHighestCalorieCount(elfSnacks)
+	fmt.Printf("Elf number %v has the highest calorie count with %v calories.\n", elf, calorieCount)
+}
+
+func findHighestCalorieCount(counts []int) (int, int) {
+	elf := 0
+	highestCalories := 0
+
+	for i, calories := range counts {
+		if highestCalories < calories {
+			highestCalories = calories
+			elf = i
+		}
+	}
+	return elf, highestCalories
 }

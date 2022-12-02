@@ -1,6 +1,7 @@
 # 12/01/2022
 
-## This list represents the Calories of the food carried by five Elves:
+## Problem
+### This list represents the Calories of the food carried by five Elves:
 
 The first Elf is carrying food with 1000, 2000, and 3000 Calories, a total of 6000 Calories.
 The second Elf is carrying one food item with 4000 Calories.
@@ -10,3 +11,8 @@ The fifth Elf is carrying one food item with 10000 Calories.
 In case the Elves get hungry and need extra snacks, they need to know which Elf to ask: they'd like to know how many Calories are being carried by the Elf carrying the most Calories. In the example above, this is 24000 (carried by the fourth Elf).
 
 Find the Elf carrying the most Calories. How many total Calories is that Elf carrying?
+
+
+## Answer
+Elf number 235 has the highest calorie count with 72240 calories.
+
