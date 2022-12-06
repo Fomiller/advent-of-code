@@ -17,16 +17,20 @@ type instruction struct {
 type stack []int
 
 func main() {
-	var (
-		partOneAnswer string
-	)
 	f, err := os.Open("./inputs/data.txt")
 	defer f.Close()
 	if err != nil {
 		panic(err)
 	}
-	partOneAnswer = partOne(f)
+	partOneAnswer := partOne(f)
+	ff, err := os.Open("./inputs/data.txt")
+	defer f.Close()
+	if err != nil {
+		panic(err)
+	}
+	partTwoAnswer := partTwo(ff)
 	fmt.Printf("The Answer to part one is: %v\n", partOneAnswer)
+	fmt.Printf("The Answer to part two is: %v\n", partTwoAnswer)
 
 }
 
@@ -37,8 +41,20 @@ func partOne(f *os.File) string {
 	stacks := createStacks(scanner)
 	instructions := createInstructions(scanner)
 
-	newStacks := crane(stacks, instructions)
-	fmt.Println(newStacks)
+	newStacks := crane9000(stacks, instructions)
+	topCrates := getTopCrates(newStacks)
+
+	return topCrates
+}
+
+func partTwo(f *os.File) string {
+	scanner := bufio.NewScanner(f)
+	scanner.Split(bufio.ScanLines)
+
+	stacks := createStacks(scanner)
+	instructions := createInstructions(scanner)
+
+	newStacks := crane9001(stacks, instructions)
 	topCrates := getTopCrates(newStacks)
 
 	return topCrates
@@ -89,32 +105,36 @@ func createInstructions(scanner *bufio.Scanner) []instruction {
 	return instructions
 }
 
-func crane(stacks [][]string, instructions []instruction) [][]string {
-	fmt.Println(instructions)
+func crane9000(stacks [][]string, instructions []instruction) [][]string {
 	for _, v := range instructions {
 		moves := 0
-		fmt.Printf("m: %v\n", v.move)
 		for moves < v.move {
-			// fmt.Println(len(stacks))
-			// fmt.Println(v.from)
 			fromStack := stacks[v.from-1]
-			fmt.Printf("f: %v\n", fromStack)
 			crate, fromStack := fromStack[0], fromStack[1:]
-			fmt.Printf("c: %v\n", crate)
-			fmt.Printf("f: %v\n", fromStack)
 
 			toStack := stacks[v.to-1]
-			fmt.Printf("t: %v\n", toStack)
 			toStack = append([]string{crate}, toStack...)
-			fmt.Printf("t: %v\n", toStack)
 
 			stacks[v.from-1] = fromStack
 			stacks[v.to-1] = toStack
-			fmt.Printf("s: %s\n", stacks)
 
-			fmt.Println("-------------")
 			moves++
 		}
+	}
+
+	return stacks
+}
+
+func crane9001(stacks [][]string, instructions []instruction) [][]string {
+	for _, v := range instructions {
+		fromStack := stacks[v.from-1]
+		toStack := stacks[v.to-1]
+
+		crates, fromStack := fromStack[:v.move], fromStack[v.move:]
+
+		stacks[v.from-1] = append([]string{}, fromStack...)
+		stacks[v.to-1] = append(crates, toStack...)
+
 	}
 
 	return stacks
