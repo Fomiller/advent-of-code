@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"regexp"
+	"strconv"
 )
 
 type instruction struct {
@@ -32,19 +33,21 @@ func main() {
 func partOne(f *os.File) string {
 	scanner := bufio.NewScanner(f)
 	scanner.Split(bufio.ScanLines)
+
 	stacks := createStacks(scanner)
-	// instructions := createInstructions(scanner)
+	instructions := createInstructions(scanner)
 
-	fmt.Println(stacks)
-	fmt.Println("---------------------")
-	// fmt.Println(instructions)
+	newStacks := crane(stacks, instructions)
+	fmt.Println(newStacks)
+	topCrates := getTopCrates(newStacks)
 
-	return "CMZ"
+	return topCrates
 }
 
 func createStacks(scanner *bufio.Scanner) [][]string {
 	var stacks [][]string
 	x := make([][]string, 50)
+
 	for scanner.Scan() {
 		line := scanner.Text()
 		for i, v := range line {
@@ -66,19 +69,61 @@ func createStacks(scanner *bufio.Scanner) [][]string {
 
 	return stacks
 }
-func remove(slice [][]string, s int) [][]string {
-	if s > len(slice)-1 {
-		return slice
-	}
-	return append(slice[:s], slice[s+1:]...)
-}
 
 func createInstructions(scanner *bufio.Scanner) []instruction {
+	var instructions []instruction
 	for scanner.Scan() {
 		line := scanner.Text()
-		fmt.Println(line)
+		re := regexp.MustCompile("[0-9]+")
+		i := re.FindAllString(line, -1)
+		if i == nil {
+			continue
+		}
+
+		x := instruction{}
+		x.move, _ = strconv.Atoi(i[0])
+		x.from, _ = strconv.Atoi(i[1])
+		x.to, _ = strconv.Atoi(i[2])
+		instructions = append(instructions, x)
+	}
+	return instructions
+}
+
+func crane(stacks [][]string, instructions []instruction) [][]string {
+	fmt.Println(instructions)
+	for _, v := range instructions {
+		moves := 0
+		fmt.Printf("m: %v\n", v.move)
+		for moves < v.move {
+			// fmt.Println(len(stacks))
+			// fmt.Println(v.from)
+			fromStack := stacks[v.from-1]
+			fmt.Printf("f: %v\n", fromStack)
+			crate, fromStack := fromStack[0], fromStack[1:]
+			fmt.Printf("c: %v\n", crate)
+			fmt.Printf("f: %v\n", fromStack)
+
+			toStack := stacks[v.to-1]
+			fmt.Printf("t: %v\n", toStack)
+			toStack = append([]string{crate}, toStack...)
+			fmt.Printf("t: %v\n", toStack)
+
+			stacks[v.from-1] = fromStack
+			stacks[v.to-1] = toStack
+			fmt.Printf("s: %s\n", stacks)
+
+			fmt.Println("-------------")
+			moves++
+		}
 	}
 
-	return []instruction{}
+	return stacks
+}
 
+func getTopCrates(stacks [][]string) string {
+	var output string
+	for i := range stacks {
+		output += stacks[i][0]
+	}
+	return output
 }
