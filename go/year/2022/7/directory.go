@@ -1,6 +1,6 @@
 package main
 
-import "strings"
+import "fmt"
 
 type Directory struct {
 	Name string
@@ -8,16 +8,15 @@ type Directory struct {
 
 	Parent   *Directory
 	Children map[string]*Directory
-	Next     *Directory
-	Prev     *Directory
 
 	Files []File
 }
 
-func NewDirectory(s string) Directory {
+func NewDirectory(name string, parent *Directory) Directory {
 	var d Directory
-	data := strings.Split(s, " ")
-	d.Name = data[1]
+	d.Name = name
+	d.Children = make(map[string]*Directory)
+	d.Parent = parent
 
 	return d
 }
@@ -26,16 +25,31 @@ func (d Directory) GetFiles() []File {
 	return d.Files
 }
 
-func (d Directory) GetDirectorySize() int {
-	var DirectorySize int
+func (d *Directory) GetDirectorySize() int {
 	for _, v := range d.Files {
-		DirectorySize += v.Size
+		d.Size += v.Size
 	}
-	return DirectorySize
+
+	if d.HasChildren() {
+		fmt.Println("children")
+		for _, v := range d.Children {
+			d.Size += v.Size
+		}
+	}
+
+	return d.Size
 }
 
 func (d Directory) GetParent() *Directory {
 	return d.Parent
+}
+
+func (d Directory) HasChildren() bool {
+	if d.Children == nil {
+		return false
+	} else {
+		return true
+	}
 }
 
 func (d *Directory) AddDirectory(newDir *Directory) {
@@ -44,4 +58,13 @@ func (d *Directory) AddDirectory(newDir *Directory) {
 
 func (d *Directory) AddFile(newFile File) {
 	d.Files = append(d.Files, newFile)
+}
+
+func (d *Directory) walk() {
+	if d.HasChildren() {
+		for _, v := range d.Children {
+			v.GetDirectorySize()
+			v.walk()
+		}
+	}
 }

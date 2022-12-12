@@ -16,24 +16,13 @@ type command struct {
 }
 
 func NewFileSystem(commands []command) FileSystem {
-	root := Directory{Name: "/"}
+	root := NewDirectory("/", nil)
 	f := FileSystem{}
+	f.Directories = make(map[string]*Directory)
 	f.Directories[root.Name] = &root
 	f.CurrentDir = f.Directories[root.Name]
 
 	for _, cmd := range commands[1:] {
-		// only ls has output, this could maybe be handled better
-		// if cmd.output != nil {
-		// 	for _, v := range cmd.output {
-		// 		v := strings.Split(v, " ")
-		// 		if v[0] == "dir" {
-		// 			newDir := NewDirectory(v[1])
-		// 			f.Directories[newDir.Name] = &newDir
-		// 		}
-		// 	}
-		// } else {
-		// 	runCmd()
-		// }
 		runCmd(cmd, &f)
 	}
 
@@ -41,14 +30,19 @@ func NewFileSystem(commands []command) FileSystem {
 }
 
 func (f *FileSystem) prev() {
-	f.CurrentDir = f.CurrentDir.GetParent()
+	if f.CurrentDir != nil {
+		f.CurrentDir = f.CurrentDir.GetParent()
+	} else {
+		log.Println("No parent Dir.")
+	}
 }
 
 func (f *FileSystem) next(s string) {
-	f.CurrentDir = f.Directories[s]
+	f.CurrentDir = f.CurrentDir.Children[s]
 }
 
 // Turn this into a type
+// create command type with cmd.run()
 func runCmd(cmd command, f *FileSystem) {
 	if strings.Contains(cmd.input[0], "cd") {
 		f.cdCmd(cmd)
@@ -74,14 +68,25 @@ func (f *FileSystem) lsCmd(cmd command) {
 			v := strings.Split(v, " ")
 
 			if v[0] == "dir" {
-				newDir := NewDirectory(v[1])
+				newDir := NewDirectory(v[1], f.CurrentDir)
 				f.CurrentDir.Children[newDir.Name] = &newDir
+
 			} else {
-				name := v[0]
-				size := v[1]
+				size := v[0]
+				name := v[1]
 				newFile := NewFile(name, size, f.CurrentDir)
 				f.CurrentDir.Files = append(f.CurrentDir.Files, newFile)
 			}
 		}
 	}
+}
+
+func (f *FileSystem) GetLargeDirs() []Directory {
+	var largeDirs []Directory
+	for _, v := range f.CurrentDir.Children {
+		if v.Size <= 100000 {
+			largeDirs = append(largeDirs, *v)
+		}
+	}
+	return largeDirs
 }
