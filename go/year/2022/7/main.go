@@ -8,7 +8,7 @@ import (
 )
 
 func main() {
-	f, err := os.Open("./inputs/test-data.txt")
+	f, err := os.Open("./inputs/data.txt")
 	defer f.Close()
 	if err != nil {
 		panic(err)
@@ -28,21 +28,17 @@ func partOne(f *os.File) int {
 	fileSystem := NewFileSystem(commands)
 	fileSystem.CurrentDir = fileSystem.Directories["/"]
 
-	fmt.Println(fileSystem.CurrentDir)
+	y := fileSystem.GetLargeDirs()
+	z := 0
 
-	fileSystem.CurrentDir.walk()
-
-	x := fileSystem.GetLargeDirs()
-
-	fmt.Println(x)
-
-	g := 0
-	for _, v := range x {
-		fmt.Printf("%v - %v\n", v.Name, v.Size)
-		g += v.Size
+	for _, v := range y {
+		fmt.Printf("%v %v\n", v.Name, v.Size)
+		if v.Size <= 100000 {
+			z += v.Size
+		}
 	}
 
-	return g
+	return z
 }
 
 // func partTwo() int {

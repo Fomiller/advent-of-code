@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 type Directory struct {
 	Name string
 	Size int
@@ -31,7 +29,6 @@ func (d *Directory) GetDirectorySize() int {
 	}
 
 	if d.HasChildren() {
-		fmt.Println("children")
 		for _, v := range d.Children {
 			d.Size += v.Size
 		}
@@ -60,11 +57,22 @@ func (d *Directory) AddFile(newFile File) {
 	d.Files = append(d.Files, newFile)
 }
 
-func (d *Directory) walk() {
-	if d.HasChildren() {
-		for _, v := range d.Children {
-			v.GetDirectorySize()
-			v.walk()
-		}
+func (d *Directory) findDirectorySize(x *[]*Directory) int {
+	totalFileSize := 0
+	totalChildrenSize := 0
+
+	for _, v := range d.Files {
+		totalFileSize += v.Size
 	}
+
+	for _, v := range d.Children {
+		totalChildrenSize += v.findDirectorySize(x)
+	}
+
+	d.Size = totalChildrenSize + totalFileSize
+	if d.Size <= 1000000 {
+		*x = append(*x, d)
+	}
+
+	return d.Size
 }

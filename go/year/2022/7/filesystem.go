@@ -81,12 +81,12 @@ func (f *FileSystem) lsCmd(cmd command) {
 	}
 }
 
-func (f *FileSystem) GetLargeDirs() []Directory {
-	var largeDirs []Directory
+func (f *FileSystem) GetLargeDirs() []*Directory {
+	x := &[]*Directory{}
+
 	for _, v := range f.CurrentDir.Children {
-		if v.Size <= 100000 {
-			largeDirs = append(largeDirs, *v)
-		}
+		_ = v.findDirectorySize(x)
 	}
-	return largeDirs
+
+	return *x
 }

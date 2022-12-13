@@ -75,3 +75,8 @@ To begin, find all of the directories with a total size of at most 100000, then 
 Find all of the directories with a total size of at most 100000. What is the sum of the total sizes of those directories?
 
 ## Answer
+
+The Answer to part one is: 1723892
+
+6552309
+8474158
